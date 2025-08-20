@@ -19,13 +19,7 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Install Java (for Android SDK)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Start Android Emulator
+      - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
@@ -33,22 +27,19 @@ jobs:
           arch: x86_64
           profile: pixel_5
           emulator-options: -no-window -no-audio -no-boot-anim
-          script: echo "Emulator booted"
+          script: |
+            echo "Start Appium server"
+            npm install -g appium
+            appium --log-level info &
 
-      - name: Start Appium server
-        run: |
-          npm install -g appium
-          appium --log-level info &
-          sleep 10
+            echo "Restore dotnet dependencies"
+            dotnet restore
 
-      - name: Restore dotnet dependencies
-        run: dotnet restore
+            echo "Build project"
+            dotnet build --configuration Release
 
-      - name: Build project
-        run: dotnet build --configuration Release
-
-      - name: Run NUnit tests
-        run: dotnet test --configuration Release --logger:"trx;LogFileName=test_results.trx"
+            echo "Run NUnit tests"
+            dotnet test --configuration Release --logger:"trx;LogFileName=test_results.trx"
 
       - name: Publish Test Results
         if: always()

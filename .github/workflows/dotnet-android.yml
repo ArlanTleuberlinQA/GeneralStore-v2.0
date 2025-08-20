@@ -33,18 +33,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libpulse0 libglu1
 
-      - name: Start Android Emulator
+      - name: Run emulator
         uses: ReactiveCircus/android-emulator-runner@v2
         with:
           api-level: 30
-          target: google_apis
-          arch: x86_64
-          profile: pixel_5
-          emulator-options: -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect
-          script: |
-            adb wait-for-device
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 5; done'
-            echo "Emulator booted"
+        target: google_apis
+        arch: x86_64
+        profile: pixel_5
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim
+        disable-animations: true
+        script: ./gradlew connectedCheck
 
       - name: Start Appium server
         run: appium --log-level info &

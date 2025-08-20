@@ -32,7 +32,7 @@ jobs:
           script: |
             echo "Start Appium server"
             npm install -g appium
-            appium --log-level info > appium.log 2>&1 &
+            appium --log-level info --base-path /wd/hub > appium.log 2>&1 &
             npx wait-on tcp:4723
 
             echo "Restore dotnet dependencies"

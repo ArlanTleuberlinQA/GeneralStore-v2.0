@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+          
+      - name: Install Appium Android driver
+        run: appium driver install uiautomator2
+
 
       - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2

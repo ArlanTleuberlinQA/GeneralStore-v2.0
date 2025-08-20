@@ -22,12 +22,12 @@ jobs:
       - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 29
           target: google_apis
           arch: x86_64
           profile: pixel_5
           emulator-options: -no-window -no-audio -no-boot-anim
-          disable-animations: true
+          disable-animations: false
           emulator-boot-timeout: 600
           script: |
             echo "Start Appium server"

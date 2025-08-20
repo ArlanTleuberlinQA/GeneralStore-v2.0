@@ -25,28 +25,30 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run Android Emulator and Execute Tests
+      - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
           target: google_apis
           arch: x86_64
           profile: pixel_5
-          emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim
-          disable-animations: true
-          script: |
-            echo "Install Appium"
-            npm install -g appium
-            appium --log-level info &
+          emulator-options: -no-window -no-audio -no-boot-anim
+          script: echo "Emulator booted"
 
-            echo "Restore dotnet dependencies"
-            dotnet restore
+      - name: Start Appium server
+        run: |
+          npm install -g appium
+          appium --log-level info &
+          sleep 10
 
-            echo "Build project"
-            dotnet build --configuration Release
+      - name: Restore dotnet dependencies
+        run: dotnet restore
 
-            echo "Run NUnit tests"
-            dotnet test --configuration Release --logger:"trx;LogFileName=test_results.trx"
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Run NUnit tests
+        run: dotnet test --configuration Release --logger:"trx;LogFileName=test_results.trx"
 
       - name: Publish Test Results
         if: always()

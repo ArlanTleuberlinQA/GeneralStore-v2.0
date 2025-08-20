@@ -28,6 +28,12 @@ public static AppiumOptions BuildAndroidOptions()
     opts.App = apkPath;
     opts.AddAdditionalAppiumOption("appPackage", DefaultAppPackage);
     opts.AddAdditionalAppiumOption("appActivity", DefaultAppActivity);
+    opts.AddAdditionalAppiumOption("ignoreHiddenApiPolicyError", true);  // пропускаємо hidden API помилки
+    opts.AddAdditionalAppiumOption("uiautomator2ServerInstallTimeout", 120000); // 120 секунд
+    opts.AddAdditionalAppiumOption("adbExecTimeout", 120000); // 120 секунд
+    opts.AddAdditionalAppiumOption("newCommandTimeout", 300); // 5 хвилин для нових команд
+    opts.AddAdditionalAppiumOption("skipServerInstallation", false); // щоб змусити встановлення сервера/Settings
+    opts.AddAdditionalAppiumOption("skipDeviceInitialization", false); // ініціалізація емулятора
 
     return opts;
 }

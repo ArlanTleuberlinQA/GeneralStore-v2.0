@@ -58,7 +58,7 @@ jobs:
 
 
             echo "Run NUnit tests"
-             dotnet test ./GeneralStore/GeneralStore.sln \ --configuration Release --logger:"trx;LogFileName=test_results.trx" \ 
+             dotnet test ./GeneralStore/GeneralStore.sln --configuration Release --logger:"trx;LogFileName=test_results.trx" \ 
               -- TestRunParameters.Parameter(name=\"uiautomator2ServerLaunchTimeout\", value=\"90000\")
 
       - name: Upload Appium logs

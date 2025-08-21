@@ -35,6 +35,10 @@ public static AppiumOptions BuildAndroidOptions()
     opts.AddAdditionalAppiumOption("skipServerInstallation", false); // щоб змусити встановлення сервера/Settings
     opts.AddAdditionalAppiumOption("skipDeviceInitialization", false); // ініціалізація емулятора
     opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", true);
+    opts.AddAdditionalAppiumOption("uiautomator2ServerLaunchTimeout", 90000); // 90 секунд для запуску сервера
+    opts.AddAdditionalAppiumOption("disableWindowAnimation", true);
+    opts.AddAdditionalAppiumOption("skipServerInstallation", true);
+    opts.AddAdditionalAppiumOption("adbExecTimeout", 120000);
 
     return opts;
 }

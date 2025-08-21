@@ -53,8 +53,13 @@ jobs:
             echo "Build project"
             dotnet build --configuration Release
 
+            echo "Wait for emulator"
+            adb wait-for-device && sleep 60
+
+
             echo "Run NUnit tests"
-            dotnet test --configuration Release --logger:"trx;LogFileName=test_results.trx"
+             dotnet test --configuration Release --logger:"trx;LogFileName=test_results.trx" \ 
+              -- TestRunParameters.Parameter(name=\"uiautomator2ServerLaunchTimeout\", value=\"90000\")
 
       - name: Upload Appium logs
         if: always()

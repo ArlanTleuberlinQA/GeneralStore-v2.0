@@ -36,15 +36,10 @@ jobs:
 
             echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
             echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-            
+
             echo "Install Appium"
             npm install -g appium
             appium driver install uiautomator2
-
-            echo "Ensure Appium Settings installed"
-            adb install -r $(npm root -g)/appium/node_modules/io.appium.settings/apks/settings_apk-debug.apk || true
-            adb shell am start -n io.appium.settings/.Settings || true
-
 
 
             echo "Start Appium server"

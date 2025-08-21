@@ -34,6 +34,7 @@ public static AppiumOptions BuildAndroidOptions()
     opts.AddAdditionalAppiumOption("newCommandTimeout", 300); // 5 хвилин для нових команд
     opts.AddAdditionalAppiumOption("skipServerInstallation", false); // щоб змусити встановлення сервера/Settings
     opts.AddAdditionalAppiumOption("skipDeviceInitialization", false); // ініціалізація емулятора
+    opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", true);
 
     return opts;
 }

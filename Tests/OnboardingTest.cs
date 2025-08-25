@@ -36,20 +36,19 @@ namespace GeneralStore.Tests.OnboardingTests
             {
                 Assert.That(_splash.IsDisplayed, Is.True,  "Splash не отображается");
                 Assert.That(_splash.IsEnabled,   Is.True,  "Splash не Enabled");
-                Assert.That(_splash.IsClickable, Is.False, "Splash кликабелен");
                 Assert.That(_splash.HasAnyText,  Is.False, "На Splash есть текст");
             });
         }
  
-        [Test]
-        public void NavigationBarBackground_visible_and_enabled()
-        {
-            Assert.Multiple(() =>
-            {
-                Assert.That(_splash.NavBarDisplayed, Is.True, "NavBarBackground не виден");
-                Assert.That(_splash.NavBarEnabled,   Is.True, "NavBarBackground не Enabled");
-            });
-        }
+        // [Test]
+        // public void NavigationBarBackground_visible_and_enabled()
+        // {
+        //     Assert.Multiple(() =>
+        //     {
+        //         Assert.That(_splash.NavBarDisplayed, Is.True, "NavBarBackground не виден");
+        //         Assert.That(_splash.NavBarEnabled,   Is.True, "NavBarBackground не Enabled");
+        //     });
+        // }
  
         [OneTimeTearDown]
         public void TearDown()

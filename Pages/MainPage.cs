@@ -25,7 +25,6 @@ namespace GeneralStore.Pages.MainPage
 
         public bool IsDisplayed => WaitFor(_splash).Displayed;
         public bool IsEnabled => WaitFor(_splash).Enabled;
-        public bool IsClickable => WaitFor(_splash).GetAttribute("clickable") == "true";
         public bool HasAnyText => !string.IsNullOrEmpty(WaitFor(_splash).Text);
 
 

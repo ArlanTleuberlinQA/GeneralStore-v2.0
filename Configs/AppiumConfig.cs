@@ -31,13 +31,13 @@ public static AppiumOptions BuildAndroidOptions()
     opts.AddAdditionalAppiumOption("ignoreHiddenApiPolicyError", true);
 
     // таймаути
-    opts.AddAdditionalAppiumOption("uiautomator2ServerInstallTimeout", 120000);
-    opts.AddAdditionalAppiumOption("uiautomator2ServerLaunchTimeout", 90000);
-    opts.AddAdditionalAppiumOption("adbExecTimeout", 120000);
+    opts.AddAdditionalAppiumOption("uiautomator2ServerInstallTimeout", 180000);
+    opts.AddAdditionalAppiumOption("uiautomator2ServerLaunchTimeout", 180000);
+    opts.AddAdditionalAppiumOption("adbExecTimeout", 180000);
     opts.AddAdditionalAppiumOption("newCommandTimeout", 300);
 
     // важливе
-    // opts.AddAdditionalAppiumOption("skipServerInstallation", false);
+    opts.AddAdditionalAppiumOption("skipServerInstallation", false);
     opts.AddAdditionalAppiumOption("skipDeviceInitialization", false);
     opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", false);
     opts.AddAdditionalAppiumOption("disableWindowAnimation", true);

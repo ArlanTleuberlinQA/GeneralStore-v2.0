@@ -25,6 +25,14 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Cache NPM
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:

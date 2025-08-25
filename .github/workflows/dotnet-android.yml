@@ -79,6 +79,9 @@ jobs:
 
             echo "Wait for emulator"
             adb wait-for-device && sleep 60
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+            adb shell 'while [[ "$(getprop init.svc.package)" != "running" ]]; do sleep 1; done;'
+            sleep 30
 
 
             echo "Run NUnit tests"

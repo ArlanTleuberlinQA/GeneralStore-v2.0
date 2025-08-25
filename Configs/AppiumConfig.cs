@@ -37,7 +37,7 @@ public static AppiumOptions BuildAndroidOptions()
     opts.AddAdditionalAppiumOption("newCommandTimeout", 300);
 
     // важливе
-    opts.AddAdditionalAppiumOption("skipServerInstallation", false);
+    // opts.AddAdditionalAppiumOption("skipServerInstallation", false);
     opts.AddAdditionalAppiumOption("skipDeviceInitialization", false);
     opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", false);
     opts.AddAdditionalAppiumOption("disableWindowAnimation", true);

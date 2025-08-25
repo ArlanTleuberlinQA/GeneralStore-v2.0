@@ -56,8 +56,6 @@ jobs:
             echo "Install Appium + driver"
             npm install -g --unsafe-perm appium wait-on
             npx appium driver install uiautomator2
-            npx appium driver install settings
-
 
             echo "Start Appium server"
             nohup npx appium --base-path /wd/hub --session-override --relaxed-security > appium.log 2>&1 &

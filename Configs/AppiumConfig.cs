@@ -28,17 +28,19 @@ public static AppiumOptions BuildAndroidOptions()
     opts.App = apkPath;
     opts.AddAdditionalAppiumOption("appPackage", DefaultAppPackage);
     opts.AddAdditionalAppiumOption("appActivity", DefaultAppActivity);
-    opts.AddAdditionalAppiumOption("ignoreHiddenApiPolicyError", true);  // пропускаємо hidden API помилки
-    opts.AddAdditionalAppiumOption("uiautomator2ServerInstallTimeout", 120000); // 120 секунд
-    opts.AddAdditionalAppiumOption("adbExecTimeout", 120000); // 120 секунд
-    opts.AddAdditionalAppiumOption("newCommandTimeout", 300); // 5 хвилин для нових команд
-    opts.AddAdditionalAppiumOption("skipServerInstallation", false); // щоб змусити встановлення сервера/Settings
-    opts.AddAdditionalAppiumOption("skipDeviceInitialization", false); // ініціалізація емулятора
-    opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", true);
-    opts.AddAdditionalAppiumOption("uiautomator2ServerLaunchTimeout", 90000); // 90 секунд для запуску сервера
-    opts.AddAdditionalAppiumOption("disableWindowAnimation", true);
-    opts.AddAdditionalAppiumOption("skipServerInstallation", true);
+    opts.AddAdditionalAppiumOption("ignoreHiddenApiPolicyError", true);
+
+    // таймаути
+    opts.AddAdditionalAppiumOption("uiautomator2ServerInstallTimeout", 120000);
+    opts.AddAdditionalAppiumOption("uiautomator2ServerLaunchTimeout", 90000);
     opts.AddAdditionalAppiumOption("adbExecTimeout", 120000);
+    opts.AddAdditionalAppiumOption("newCommandTimeout", 300);
+
+    // важливе
+    opts.AddAdditionalAppiumOption("skipServerInstallation", false);
+    opts.AddAdditionalAppiumOption("skipDeviceInitialization", false);
+    opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", false);
+    opts.AddAdditionalAppiumOption("disableWindowAnimation", true);
 
     return opts;
 }

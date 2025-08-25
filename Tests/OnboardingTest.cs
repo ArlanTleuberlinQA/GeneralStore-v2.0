@@ -14,7 +14,7 @@ namespace GeneralStore.Tests.OnboardingTests
         private MainPage _splash;
  
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public void SetUp()
         {
             var serverUrl = new Uri(
                 Environment.GetEnvironmentVariable("APPIUM_SERVER_URL")
@@ -52,7 +52,7 @@ namespace GeneralStore.Tests.OnboardingTests
         }
  
         [OneTimeTearDown]
-        public void OneTimeTearDown()
+        public void TearDown()
         {
             try
             {

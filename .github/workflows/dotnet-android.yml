@@ -41,6 +41,12 @@ jobs:
             /usr/local/lib/android/sdk/platforms
             /usr/local/lib/android/sdk/system-images
           key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle') }}
+        
+      - name: Cache AVD
+        uses: actions/cache@v3
+        with:
+          path: ~/.android/avd
+        key: ${{ runner.os }}-avd-${{ hashFiles('**/build.gradle') }}
 
       - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -65,6 +71,12 @@ jobs:
             echo "Install Appium + driver"
             npm install -g --unsafe-perm appium wait-on
             npx appium driver install uiautomator2
+            SETTINGS_APK=$(find $(npm root -g) -path "*/appium-settings/apks/settings_apk-debug.apk" | head -n 1)
+            if [ -n "$SETTINGS_APK" ]; then
+              adb install -r "$SETTINGS_APK" || true
+            else
+              echo "⚠ settings_apk-debug.apk not found!"
+            fi
 
 
             echo "Start Appium server"
@@ -78,10 +90,19 @@ jobs:
             dotnet build --configuration Release
 
             echo "Wait for emulator"
-             adb wait-for-device
-             adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-             until adb shell pm list packages >/dev/null 2>&1; do sleep 1; done;
+            adb wait-for-device
+            until adb shell getprop init.svc.bootanim | grep -m 1 "stopped"; do
+              echo "Waiting for boot animation to stop..."
+              sleep 5
+            done
+             
+            until adb shell pm list packages >/dev/null 2>&1; do
+              echo "Waiting for package manager..."
+              sleep 5 
+            done
+             
              sleep 30
+             
              adb shell input keyevent 82
 
 

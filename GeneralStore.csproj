@@ -18,6 +18,9 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageReference Include="Selenium.Support" Version="4.33.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.33.0" />
+    <PackageReference Include="SpecFlow.NUnit" Version="3.9.74" />
+    <PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
+    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.74" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,5 +32,9 @@
 <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 </None>
 </ItemGroup>
+
+<Target Name="PostTest" AfterTargets="Test">
+<Exec Command="livingdoc test-assembly bin\Debug\net9.0\GeneralStore.dll -t bin\Debug\net9.0\TestExecution.json" />
+</Target>
 
 </Project>

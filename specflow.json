@@ -1,0 +1,14 @@
+{
+  "language": {
+    "feature": "ru"
+  },
+  "bindingCulture": {
+    "name": "ru"
+  },
+  "plugins": [
+    {
+      "name": "SpecFlow.Plus.LivingDocPlugin",
+      "type": "Runtime"
+    }
+  ]
+}

@@ -83,6 +83,18 @@
               "target": "Package",
               "version": "[4.33.0, )"
             },
+            "SpecFlow.NUnit": {
+              "target": "Package",
+              "version": "[3.9.74, )"
+            },
+            "SpecFlow.Plus.LivingDocPlugin": {
+              "target": "Package",
+              "version": "[3.9.57, )"
+            },
+            "SpecFlow.Tools.MsBuild.Generation": {
+              "target": "Package",
+              "version": "[3.9.74, )"
+            },
             "coverlet.collector": {
               "target": "Package",
               "version": "[6.0.2, )"

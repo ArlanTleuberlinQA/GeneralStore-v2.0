@@ -8,7 +8,7 @@ namespace GeneralStore.Configs
     public static class AppiumConfig
     {
         private const string DefaultApk          = "General-Store.apk";
-        private const string DefaultDeviceName   = "Android Emulator";
+        private const string DefaultDeviceName   = "emulator-5554";
         private const string DefaultPlatformName = "Android";
         private const string DefaultAutomation   = "UiAutomator2";
         private const string DefaultAppPackage   = "com.androidsample.generalstore";
@@ -18,7 +18,7 @@ public static AppiumOptions BuildAndroidOptions()
 {
     var opts = new AppiumOptions();
     opts.PlatformName   = GetEnvOr(DefaultPlatformName,  "APPIUM_PLATFORM_NAME");
-    opts.DeviceName     = GetEnvOr(DefaultDeviceName,    "APPIUM_DEVICE_NAME");
+    opts.DeviceName     = GetEnvOr(DefaultDeviceName,    "APPIUM_DEVICE_NAME")?? "emulator-5554";
     opts.AutomationName = GetEnvOr(DefaultAutomation,    "APPIUM_AUTOMATION_NAME");
 
     var apkPath = GetEnvOr(
@@ -35,9 +35,11 @@ public static AppiumOptions BuildAndroidOptions()
     opts.AddAdditionalAppiumOption("uiautomator2ServerLaunchTimeout", 180000);
     opts.AddAdditionalAppiumOption("adbExecTimeout", 180000);
     opts.AddAdditionalAppiumOption("newCommandTimeout", 300);
+    opts.AddAdditionalAppiumOption("avdLaunchTimeout", 600000);
+    opts.AddAdditionalAppiumOption("avdReadyTimeout", 600000);
 
     // важливе
-    opts.AddAdditionalAppiumOption("skipServerInstallation", false);
+            opts.AddAdditionalAppiumOption("skipServerInstallation", false);
     opts.AddAdditionalAppiumOption("skipDeviceInitialization", false);
     opts.AddAdditionalAppiumOption("skipSettingsAppInstallation", false);
     opts.AddAdditionalAppiumOption("disableWindowAnimation", true);

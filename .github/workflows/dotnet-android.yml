@@ -93,8 +93,8 @@ jobs:
 
             echo "Wait for emulator to finish boot"
             adb wait-for-device
-            until adb shell getprop init.svc.bootanim | grep -m 1 "stopped"; do
-              echo "Waiting for boot animation to stop..."
+            while [[ "$(adb shell getprop sys.boot_completed 2>/dev/null)" != "1" ]]; do
+              echo "Waiting for Android system to boot..."
               sleep 5
             done
 

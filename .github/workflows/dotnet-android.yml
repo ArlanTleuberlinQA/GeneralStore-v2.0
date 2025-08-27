@@ -48,6 +48,19 @@ jobs:
           path: ~/.android/avd
           key: ${{ runner.os }}-avd-${{ hashFiles('**/build.gradle') }}
 
+      - name: Install Appium + driver
+        run: |
+          echo "Install Appium + driver"
+          npm install -g --unsafe-perm appium wait-on
+          npx appium driver install uiautomator2
+          
+          SETTINGS_APK=$(find $(npm root -g) -path "*/appium-settings/apks/settings_apk-debug.apk" | head -n 1)
+          if [ -n "$SETTINGS_APK" ]; then
+            adb install -r "$SETTINGS_APK" || true
+          else
+            echo "⚠ settings_apk-debug.apk not found!"
+          fi
+
       - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -68,17 +81,6 @@ jobs:
             echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
             echo "$JAVA_HOME_17_X64/bin" >> $GITHUB_PATH
 
-            echo "Install Appium + driver"
-            npm install -g --unsafe-perm appium wait-on
-            npx appium driver install uiautomator2
-            SETTINGS_APK=$(find $(npm root -g) -path "*/appium-settings/apks/settings_apk-debug.apk" | head -n 1)
-            if [ -n "$SETTINGS_APK" ]; then
-              adb install -r "$SETTINGS_APK" || true
-            else
-              echo "⚠ settings_apk-debug.apk not found!"
-            fi
-
-
             echo "Start Appium server"
             nohup npx appium --base-path /wd/hub --session-override --relaxed-security > appium.log 2>&1 &
             npx wait-on tcp:4723
@@ -89,25 +91,23 @@ jobs:
             echo "Build project"
             dotnet build --configuration Release
 
-            echo "Wait for emulator"
+            echo "Wait for emulator to finish boot"
             adb wait-for-device
             until adb shell getprop init.svc.bootanim | grep -m 1 "stopped"; do
               echo "Waiting for boot animation to stop..."
               sleep 5
             done
-             
+
             until adb shell pm list packages >/dev/null 2>&1; do
               echo "Waiting for package manager..."
-              sleep 5 
+              sleep 5
             done
-             
-             sleep 30
-             
-             adb shell input keyevent 82
 
+            sleep 30
+            adb shell input keyevent 82
 
             echo "Run NUnit tests"
-             dotnet test ./GeneralStore.sln --configuration Release --logger:"trx;LogFileName=test_results.trx"
+            dotnet test ./GeneralStore.sln --configuration Release --logger:"trx;LogFileName=test_results.trx"
 
       - name: Upload Appium logs
         if: always()

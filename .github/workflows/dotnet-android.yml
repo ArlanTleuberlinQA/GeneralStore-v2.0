@@ -69,13 +69,9 @@ jobs:
           arch: x86_64
           profile: pixel_5
           emulator-options: -no-window -no-audio -no-boot-anim
-          disable-animations: false
+          disable-animations: true
           emulator-boot-timeout: 900
           script: |
-            echo "Start emulator readiness checks"
-            adb wait-for-device
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-
             echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
             echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
             echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
@@ -85,26 +81,12 @@ jobs:
             nohup npx appium --base-path /wd/hub --session-override --relaxed-security > appium.log 2>&1 &
             npx wait-on tcp:4723
 
-            echo "Restore dotnet dependencies"
+            echo "Restore and build project"
             dotnet restore
-
-            echo "Build project"
             dotnet build --configuration Release
 
-            echo "Wait for emulator to finish boot"
-            adb wait-for-device
-            while [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" != "1" ]; do
-              echo "Waiting for Android system to boot..."
-              sleep 5
-            done
-            echo "Android boot completed!"
-
-            until adb shell pm list packages >/dev/null 2>&1; do
-              echo "Waiting for package manager..."
-              sleep 5
-            done
-
-            sleep 30
+      
+            sleep 10
             adb shell input keyevent 82
 
             echo "Run NUnit tests"

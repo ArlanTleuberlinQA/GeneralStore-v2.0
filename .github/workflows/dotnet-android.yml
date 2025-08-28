@@ -9,7 +9,7 @@ on:
 jobs:
   android-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -26,14 +26,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Cache NPM
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
       - name: Install Appium + driver
         run: |
           echo "📦 Installing Appium and drivers..."
@@ -41,7 +33,7 @@ jobs:
           npx appium driver install uiautomator2
           echo "✅ Appium installation completed"
 
-      - name: Start Android Emulator and run tests
+      - name: Start Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
@@ -55,49 +47,63 @@ jobs:
             echo "🔧 Setting up environment variables..."
             echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
             echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-            echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
-            echo "$JAVA_HOME_17_X64/bin" >> $GITHUB_PATH
-
+            
             echo "📱 Additional emulator stabilization..."
-            sleep 30
+            sleep 45
             adb devices
             adb shell getprop sys.boot_completed
             adb shell input keyevent 82
-            sleep 10
-
-            echo "🚀 Starting Appium server..."
-            nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
-            APPIUM_PID=$!
+            sleep 15
             
-            echo "⏳ Waiting for Appium to start..."
-            # Спрощена версія без складних умовних блоків
-            npx wait-on tcp:4723 --timeout=60000
-            if [ $? -ne 0 ]; then
-              echo "❌ Appium failed to start within 60 seconds"
-              cat appium.log
-              exit 1
-            fi
+            # Зберігаємо PID емулятора для подальшого ручного керування
+            EMULATOR_PID=$(ps aux | grep -i emulator | grep -v grep | awk '{print $2}')
+            echo "EMULATOR_PID=$EMULATOR_PID" >> $GITHUB_ENV
 
-            echo "✅ Verifying Appium connectivity..."
-            curl -f http://localhost:4723/wd/hub/sessions
-            if [ $? -ne 0 ]; then
-              echo "❌ Appium not responding correctly"
-              cat appium.log
-              exit 1
-            fi
+      - name: Run Appium and Tests
+        run: |
+          echo "🚀 Starting Appium server..."
+          nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
+          APPIUM_PID=$!
+          
+          echo "⏳ Waiting for Appium to start..."
+          npx wait-on tcp:4723 --timeout=60000
+          if [ $? -ne 0 ]; then
+            echo "❌ Appium failed to start within 60 seconds"
+            cat appium.log
+            exit 1
+          fi
 
-            echo "🔨 Building project..."
-            dotnet restore
-            dotnet build --configuration Release
+          echo "✅ Verifying Appium connectivity..."
+          curl -f http://localhost:4723/wd/hub/sessions
+          if [ $? -ne 0 ]; then
+            echo "❌ Appium not responding correctly"
+            cat appium.log
+            exit 1
+          fi
 
-            echo "🧪 Running NUnit tests with increased timeout..."
-            dotnet test ./GeneralStore.sln \
-              --configuration Release \
-              --logger "trx;LogFileName=test_results.trx" \
-              -- TestRunTimeout=300000
+          echo "🔨 Building project..."
+          dotnet restore
+          dotnet build --configuration Release
 
-            echo "🛑 Stopping Appium..."
-            kill $APPIUM_PID 2>/dev/null || true
+          echo "🧪 Running NUnit tests with increased timeout..."
+          dotnet test ./GeneralStore.sln \
+            --configuration Release \
+            --logger "trx;LogFileName=test_results.trx" \
+            -- TestRunTimeout=600000
+
+          echo "🛑 Stopping Appium..."
+          kill $APPIUM_PID 2>/dev/null || true
+
+      - name: Stop Emulator
+        if: always()
+        run: |
+          echo "🛑 Stopping emulator..."
+          adb emu kill || true
+          # Альтернативний спосіб зупинки
+          if [ -n "$EMULATOR_PID" ]; then
+            kill $EMULATOR_PID 2>/dev/null || true
+          fi
+          sleep 5
 
       - name: Upload diagnostics artifacts
         if: always()

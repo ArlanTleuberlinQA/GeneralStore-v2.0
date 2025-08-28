@@ -70,18 +70,21 @@ jobs:
             APPIUM_PID=$!
             
             echo "⏳ Waiting for Appium to start..."
-            timeout 60 npx wait-on tcp:4723 || {
+            # Спрощена версія без складних умовних блоків
+            npx wait-on tcp:4723 --timeout=60000
+            if [ $? -ne 0 ]; then
               echo "❌ Appium failed to start within 60 seconds"
               cat appium.log
               exit 1
-            }
+            fi
 
             echo "✅ Verifying Appium connectivity..."
-            curl -f http://localhost:4723/wd/hub/sessions || {
+            curl -f http://localhost:4723/wd/hub/sessions
+            if [ $? -ne 0 ]; then
               echo "❌ Appium not responding correctly"
               cat appium.log
               exit 1
-            }
+            fi
 
             echo "🔨 Building project..."
             dotnet restore
@@ -117,7 +120,7 @@ jobs:
       - name: Check test results
         if: always()
         run: |
-          if [ -f "**/test_results.trx" ]; then
+          if ls **/test_results.trx 1> /dev/null 2>&1; then
             echo "📊 Test results generated successfully"
           else
             echo "❌ No test results found"

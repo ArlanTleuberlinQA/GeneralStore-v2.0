@@ -93,10 +93,10 @@ jobs:
 
             echo "Wait for emulator to finish boot"
             adb wait-for-device
-            while [ "$(adb shell getprop sys.boot_completed 2>/dev/null)" != "1" ]; do
+            bash -c 'while [ "$(adb shell getprop sys.boot_completed 2>/dev/null)" != "1" ]; do
               echo "Waiting for Android system to boot..."
               sleep 5
-            done
+            done'
 
             until adb shell pm list packages >/dev/null 2>&1; do
               echo "Waiting for package manager..."

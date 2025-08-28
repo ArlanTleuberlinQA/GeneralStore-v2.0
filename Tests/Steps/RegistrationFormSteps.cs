@@ -51,7 +51,6 @@ namespace GeneralStore.Tests.RegistrationFormTests
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
-        // Step definitions for feature files
 
         [Given(@"the user is on the registration page")]
         public void GivenTheUserIsOnTheRegistrationPage()
@@ -62,11 +61,10 @@ namespace GeneralStore.Tests.RegistrationFormTests
         [When(@"the user views the country selection text")]
         public void WhenTheUserViewsTheCountrySelectionText()
         {
-            // This step is for observation only, no action needed
         }
 
         [Then(@"the country selection text should be ""(.*)""")]
-        public void ThenTheCountrySelectionTextShouldBe(string expectedText)
+        public void ThenTheCountrySelectionTextShouldBe(string expectedText = "Select the country where you want to shop")
         {
             Assert.Multiple(() =>
             {
@@ -77,8 +75,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             });
         }
 
-        [When(@"the user selects country ""(.*)""")]
-        public void WhenTheUserSelectsCountry(string countryName)
+        [When(@"the user selects country France")]
+        public void WhenTheUserSelectsCountry(string countryName = "France")
         {
             Assert.Multiple(() =>
             {
@@ -90,8 +88,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             _mainPage.SelectCountry(countryName);
         }
 
-        [Then(@"the selected country should be ""(.*)""")]
-        public void ThenTheSelectedCountryShouldBe(string expectedCountry)
+        [Then(@"the selected country should be France")]
+        public void ThenTheSelectedCountryShouldBe(string expectedCountry = "France")
         {
             Assert.Multiple(() =>
             {
@@ -111,8 +109,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             });
         }
 
-        [Then(@"the toolbar title should be ""(.*)""")]
-        public void ThenTheToolbarTitleShouldBe(string expectedTitle)
+        [Then(@"the toolbar title should be General Store")]
+        public void ThenTheToolbarTitleShouldBe(string expectedTitle = "General Store")
         {
             Assert.Multiple(() =>
             {
@@ -122,8 +120,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             });
         }
 
-        [When(@"the user selects gender ""(.*)""")]
-        public void WhenTheUserSelectsGender(string gender)
+        [When(@"the user selects gender female")]
+        public void WhenTheUserSelectsGender(string gender = "female")
         {
             if (gender.ToLower() == "female")
             {
@@ -135,8 +133,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             }
         }
 
-        [Then(@"the ""(.*)"" radio button should be selected")]
-        public void ThenTheRadioButtonShouldBeSelected(string gender)
+        [Then(@"the female radio button should be selected")]
+        public void ThenTheRadioButtonShouldBeSelected(string gender = "female")
         {
             if (gender.ToLower() == "female")
             {
@@ -148,8 +146,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             }
         }
 
-        [When(@"the user enters name ""(.*)""")]
-        public void WhenTheUserEntersName(string name)
+        [When(@"the user enters name TestUser")]
+        public void WhenTheUserEntersName(string name = "TestUser")
         {
             Assert.Multiple(() =>
             {
@@ -172,8 +170,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             _mainPage.ClickLetsShopButton();
         }
 
-        [Then(@"an error toast message should appear saying ""(.*)""")]
-        public void ThenAnErrorToastMessageShouldAppearSaying(string expectedMessage)
+        [Then(@"an error toast message should appear saying Please enter your name")]
+        public void ThenAnErrorToastMessageShouldAppearSaying(string expectedMessage = "Please enter your name")
         {
             bool toastAppeared = _wait.Until(d => d.PageSource.Contains(expectedMessage));
             Assert.That(toastAppeared, Is.True, $"Toast message '{expectedMessage}' not found in page source.");

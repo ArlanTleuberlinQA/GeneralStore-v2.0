@@ -3,12 +3,13 @@ using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Support.UI;
 using GeneralStore.Configs;
 using GeneralStore.Pages.MainPage;
+using TechTalk.SpecFlow;
 
 
 namespace GeneralStore.Tests.RegistrationFormTests
 
 {
-    [TestFixture]
+    [Binding]
     public class RegistrationTests
     {
         private AndroidDriver driver;

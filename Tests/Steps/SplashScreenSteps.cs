@@ -43,25 +43,25 @@ namespace GeneralStore.Tests.Steps
             }
         }
  
-        [When(@"приложение запущено")]
+        [When(@"app is started")]
         public void WhenAppStarted()
         {
-            Assert.That(_splash.IsDisplayed, Is.True, "Приложение не запустилось");
+            Assert.That(_splash.IsDisplayed, Is.True, "App not started");
         }
  
-        [Then(@"Splash экран отображается")]
+        [Then(@"Splash screen is displayed")]
         public void ThenSplashDisplayed()
         {
-            Assert.That(_splash.IsDisplayed, Is.True, "Splash не отображается");
+            Assert.That(_splash.IsDisplayed, Is.True, "Splash not displayed");
         }
  
-        [Then(@"Splash экран активен")]
+        [Then(@"Splash screen is enabled")]
         public void ThenSplashEnabled()
         {
-            Assert.That(_splash.IsEnabled, Is.True, "Splash не Enabled");
+            Assert.That(_splash.IsEnabled, Is.True, "Splash not Enabled");
         }
  
-        [Then(@"на Splash экране нет текста")]
+        [Then(@"On the Splash screen there is no text")]
         public void ThenNoTextOnSplash()
         {
             Assert.That(_splash.HasAnyText, Is.False, "На Splash есть текст");

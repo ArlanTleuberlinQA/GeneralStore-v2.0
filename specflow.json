@@ -1,9 +1,9 @@
 {
   "language": {
-    "feature": "ru"
+    "feature": "en"
   },
   "bindingCulture": {
-    "name": "ru"
+    "name": "en"
   },
   "plugins": [
     {

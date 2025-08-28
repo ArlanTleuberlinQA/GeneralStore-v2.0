@@ -9,6 +9,7 @@ on:
 jobs:
   android-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -33,33 +34,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
-      - name: Cache Android SDK
-        uses: actions/cache@v3
-        with:
-          path: |
-            /usr/local/lib/android/sdk/emulator
-            /usr/local/lib/android/sdk/platforms
-            /usr/local/lib/android/sdk/system-images
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle') }}
-        
-      - name: Cache AVD
-        uses: actions/cache@v3
-        with:
-          path: ~/.android/avd
-          key: ${{ runner.os }}-avd-${{ hashFiles('**/build.gradle') }}
-
       - name: Install Appium + driver
         run: |
-          echo "Install Appium + driver"
+          echo "📦 Installing Appium and drivers..."
           npm install -g --unsafe-perm appium wait-on
           npx appium driver install uiautomator2
-          
-          SETTINGS_APK=$(find $(npm root -g) -path "*/appium-settings/apks/settings_apk-debug.apk" | head -n 1)
-          if [ -n "$SETTINGS_APK" ]; then
-            adb install -r "$SETTINGS_APK" || true
-          else
-            echo "⚠ settings_apk-debug.apk not found!"
-          fi
+          echo "✅ Appium installation completed"
 
       - name: Start Android Emulator and run tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -68,36 +48,63 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_5
-          emulator-options: -no-window -no-audio -no-boot-anim
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot-save
           disable-animations: true
-          emulator-boot-timeout: 900
+          emulator-boot-timeout: 1200
           script: |
+            echo "🔧 Setting up environment variables..."
             echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
             echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
             echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
             echo "$JAVA_HOME_17_X64/bin" >> $GITHUB_PATH
 
-            echo "Start Appium server"
-            nohup npx appium --base-path /wd/hub --session-override --relaxed-security > appium.log 2>&1 &
-            npx wait-on tcp:4723
+            echo "📱 Additional emulator stabilization..."
+            sleep 30
+            adb devices
+            adb shell getprop sys.boot_completed
+            adb shell input keyevent 82
+            sleep 10
 
-            echo "Restore and build project"
+            echo "🚀 Starting Appium server..."
+            nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
+            APPIUM_PID=$!
+            
+            echo "⏳ Waiting for Appium to start..."
+            timeout 60 npx wait-on tcp:4723 || {
+              echo "❌ Appium failed to start within 60 seconds"
+              cat appium.log
+              exit 1
+            }
+
+            echo "✅ Verifying Appium connectivity..."
+            curl -f http://localhost:4723/wd/hub/sessions || {
+              echo "❌ Appium not responding correctly"
+              cat appium.log
+              exit 1
+            }
+
+            echo "🔨 Building project..."
             dotnet restore
             dotnet build --configuration Release
 
-      
-            sleep 10
-            adb shell input keyevent 82
+            echo "🧪 Running NUnit tests with increased timeout..."
+            dotnet test ./GeneralStore.sln \
+              --configuration Release \
+              --logger "trx;LogFileName=test_results.trx" \
+              -- TestRunTimeout=300000
 
-            echo "Run NUnit tests"
-            dotnet test ./GeneralStore.sln --configuration Release --logger:"trx;LogFileName=test_results.trx"
+            echo "🛑 Stopping Appium..."
+            kill $APPIUM_PID 2>/dev/null || true
 
-      - name: Upload Appium logs
+      - name: Upload diagnostics artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: appium-log
-          path: appium.log
+          name: test-artifacts
+          path: |
+            appium.log
+            **/test_results.trx
+            **/TestResults/*
 
       - name: Publish Test Results
         if: always()
@@ -106,3 +113,13 @@ jobs:
           name: NUnit Tests
           path: "**/test_results.trx"
           reporter: dotnet-trx
+
+      - name: Check test results
+        if: always()
+        run: |
+          if [ -f "**/test_results.trx" ]; then
+            echo "📊 Test results generated successfully"
+          else
+            echo "❌ No test results found"
+            exit 1
+          fi

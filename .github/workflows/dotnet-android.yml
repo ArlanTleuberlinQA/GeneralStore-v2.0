@@ -53,6 +53,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-avd-
 
+      - name: Upload diagnostics artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics
+          path: |
+            appium.log
+            logcat.txt
+            **/test_results.trx
+            **/TestResults/*
+
       - name: Install Appium + driver
         run: |
           echo "📦 Installing Appium and drivers..."
@@ -63,11 +74,11 @@ jobs:
       - name: Start Emulator, Appium and Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 31
-          target: google_apis
+          api-level: 30
+          target: default
           arch: x86_64
-          profile: pixel_5
-          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot-save
+          profile: pixel_3a
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot-save -gpu swiftshader_indirect
           disable-animations: true
           emulator-boot-timeout: 1200
           script: |
@@ -81,6 +92,12 @@ jobs:
             adb shell getprop sys.boot_completed
             adb shell input keyevent 82
             sleep 15
+
+            echo "📋 Starting logcat capture..."
+            adb logcat -c  # Очистити лог
+            adb logcat > logcat.txt &
+            LOGCAT_PID=$!
+
 
             echo "🚀 Starting Appium server..."
             nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &

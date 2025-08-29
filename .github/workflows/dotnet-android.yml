@@ -26,6 +26,33 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Cache NPM
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Cache Android SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator
+            /usr/local/lib/android/sdk/platforms
+            /usr/local/lib/android/sdk/system-images
+          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
+
+      - name: Cache AVD
+        uses: actions/cache@v3
+        with:
+          path: ~/.android/avd
+          key: ${{ runner.os }}-avd-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-avd-
+
       - name: Install Appium + driver
         run: |
           echo "📦 Installing Appium and drivers..."
@@ -88,6 +115,7 @@ jobs:
           path: |
             appium.log
             **/test_results.trx
+            **/TestResults/*
 
       - name: Publish Test Results
         if: always()
@@ -96,3 +124,13 @@ jobs:
           name: NUnit Tests
           path: "**/test_results.trx"
           reporter: dotnet-trx
+
+      - name: Check test results
+        if: always()
+        run: |
+          if ls **/test_results.trx 1> /dev/null 2>&1; then
+            echo "📊 Test results generated successfully"
+          else
+            echo "❌ No test results found"
+            exit 1
+          fi

@@ -61,6 +61,26 @@ jobs:
 
       - name: Run Appium and Tests
         run: |
+         echo "📱 Checking device connectivity..."
+         adb devices
+         adb shell getprop ro.build.version.release
+         adb shell getprop sys.boot_completed
+    
+          echo "⏳ Additional emulator stabilization..."
+          sleep 30
+    
+          # Перевірка, що device готовий
+          echo "✅ Verifying device readiness..."
+          adb wait-for-device
+          while [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" != "1" ]; do
+            echo "Waiting for device to fully boot..."
+            sleep 10
+          done
+    
+          echo "📱 Device status:"
+          adb devices
+          adb shell ps
+
           echo "🚀 Starting Appium server with /wd/hub base path..."
           nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
           APPIUM_PID=$!

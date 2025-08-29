@@ -61,26 +61,19 @@ jobs:
 
       - name: Run Appium and Tests
         run: |
-          echo "🚀 Starting Appium server..."
-          nohup npx appium --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
+          echo "🚀 Starting Appium server with /wd/hub base path..."
+          nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
           APPIUM_PID=$!
     
           echo "⏳ Waiting for Appium to start..."
           npx wait-on tcp:4723 --timeout=60000
-          if [ $? -ne 0 ]; then
-            echo "❌ Appium failed to start within 60 seconds"
-            cat appium.log
-            exit 1
-          fi
 
           echo "✅ Verifying Appium connectivity..."
-          # Правильний ендпоінт для перевірки статусу
-          sleep 5  # Додаткове очікування для ініціалізації
-          curl -f http://localhost:4723/wd/hub/status || curl -f http://localhost:4723/status || {
+          sleep 3
+          curl -f http://localhost:4723/wd/hub/status || {
             echo "❌ Appium status check failed"
-            echo "Trying alternative endpoints..."
-            curl -v http://localhost:4723/ || true
-            curl -v http://localhost:4723/wd/hub/ || true
+            echo "Trying alternative check..."
+            nc -z localhost 4723 && echo "✅ Port 4723 is open" || echo "❌ Port 4723 is closed"
             cat appium.log
             exit 1
           }

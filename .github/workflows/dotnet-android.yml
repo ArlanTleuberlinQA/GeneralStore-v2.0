@@ -91,11 +91,11 @@ jobs:
 
             echo "✅ Verifying Appium connectivity..."
             sleep 5
-            curl -f http://localhost:4723/wd/hub/status || {
+            if ! curl -f http://localhost:4723/wd/hub/status; then
               echo "❌ Appium status check failed"
               cat appium.log
               exit 1
-            }
+            fi
 
             echo "🔨 Building project..."
             dotnet restore

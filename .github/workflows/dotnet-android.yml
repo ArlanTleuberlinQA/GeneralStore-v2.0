@@ -62,9 +62,10 @@ jobs:
       - name: Run Appium and Tests
         run: |
           echo "🚀 Starting Appium server..."
-          nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
+          # Використовуємо правильний базовий шлях
+          nohup npx appium --base-path / --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
           APPIUM_PID=$!
-          
+    
           echo "⏳ Waiting for Appium to start..."
           npx wait-on tcp:4723 --timeout=60000
           if [ $? -ne 0 ]; then
@@ -74,12 +75,16 @@ jobs:
           fi
 
           echo "✅ Verifying Appium connectivity..."
-          curl -f http://localhost:4723/wd/hub/sessions
-          if [ $? -ne 0 ]; then
+          # Перевіряємо правильний ендпоінт
+          curl -f http://localhost:4723/ || {
             echo "❌ Appium not responding correctly"
             cat appium.log
             exit 1
-          fi
+          }
+
+          # Альтернативна перевірка статусу
+          echo "📊 Appium status:"
+          curl -s http://localhost:4723/status | jq . || curl -s http://localhost:4723/status
 
           echo "🔨 Building project..."
           dotnet restore

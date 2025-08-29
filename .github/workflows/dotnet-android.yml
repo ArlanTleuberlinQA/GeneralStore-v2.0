@@ -62,8 +62,7 @@ jobs:
       - name: Run Appium and Tests
         run: |
           echo "🚀 Starting Appium server..."
-          # Використовуємо правильний базовий шлях
-          nohup npx appium --base-path / --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
+          nohup npx appium --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
           APPIUM_PID=$!
     
           echo "⏳ Waiting for Appium to start..."
@@ -75,17 +74,19 @@ jobs:
           fi
 
           echo "✅ Verifying Appium connectivity..."
-          # Перевіряємо правильний ендпоінт
-          curl -f http://localhost:4723/ || {
-            echo "❌ Appium not responding correctly"
+          # Правильний ендпоінт для перевірки статусу
+          sleep 5  # Додаткове очікування для ініціалізації
+          curl -f http://localhost:4723/wd/hub/status || curl -f http://localhost:4723/status || {
+            echo "❌ Appium status check failed"
+            echo "Trying alternative endpoints..."
+            curl -v http://localhost:4723/ || true
+            curl -v http://localhost:4723/wd/hub/ || true
             cat appium.log
             exit 1
           }
 
-          # Альтернативна перевірка статусу
-          echo "📊 Appium status:"
-          curl -s http://localhost:4723/status | jq . || curl -s http://localhost:4723/status
-
+          echo "📊 Appium is running successfully!"
+    
           echo "🔨 Building project..."
           dotnet restore
           dotnet build --configuration Release
@@ -93,7 +94,7 @@ jobs:
           echo "🧪 Running NUnit tests with increased timeout..."
           dotnet test ./GeneralStore.sln \
             --configuration Release \
-            --logger "trx;LogFileName=test_results.trx" \
+            --logger "trx;LogFileName=test_results.trx" \     
             -- TestRunTimeout=600000
 
           echo "🛑 Stopping Appium..."

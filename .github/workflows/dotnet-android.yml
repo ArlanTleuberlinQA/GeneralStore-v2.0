@@ -33,7 +33,7 @@ jobs:
           npx appium driver install uiautomator2
           echo "✅ Appium installation completed"
 
-      - name: Start Android Emulator
+      - name: Start Emulator, Appium and Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
@@ -44,7 +44,7 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 1200
           script: |
-            echo "🔧 Setting up environment variables..."
+            echo "🔧 Setting up environment..."
             echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
             echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
             
@@ -54,74 +54,31 @@ jobs:
             adb shell getprop sys.boot_completed
             adb shell input keyevent 82
             sleep 15
+
+            echo "🚀 Starting Appium server..."
+            nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
+            APPIUM_PID=$!
             
-            # Зберігаємо PID емулятора для подальшого ручного керування
-            EMULATOR_PID=$(ps aux | grep -i emulator | grep -v grep | awk '{print $2}')
-            echo "EMULATOR_PID=$EMULATOR_PID" >> $GITHUB_ENV
+            echo "⏳ Waiting for Appium to start..."
+            npx wait-on tcp:4723 --timeout=60000
 
-      - name: Run Appium and Tests
-        run: |
-         echo "📱 Checking device connectivity..."
-         adb devices
-         adb shell getprop ro.build.version.release
-         adb shell getprop sys.boot_completed
-    
-          echo "⏳ Additional emulator stabilization..."
-          sleep 30
-    
-          # Перевірка, що device готовий
-          echo "✅ Verifying device readiness..."
-          adb wait-for-device
-          while [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" != "1" ]; do
-            echo "Waiting for device to fully boot..."
-            sleep 10
-          done
-    
-          echo "📱 Device status:"
-          adb devices
-          adb shell ps
+            echo "✅ Verifying Appium connectivity..."
+            sleep 5
+            curl -f http://localhost:4723/wd/hub/status || {
+              echo "❌ Appium status check failed"
+              cat appium.log
+              exit 1
+            }
 
-          echo "🚀 Starting Appium server with /wd/hub base path..."
-          nohup npx appium --base-path /wd/hub --session-override --relaxed-security --log-level debug > appium.log 2>&1 &
-          APPIUM_PID=$!
-    
-          echo "⏳ Waiting for Appium to start..."
-          npx wait-on tcp:4723 --timeout=60000
+            echo "🔨 Building project..."
+            dotnet restore
+            dotnet build --configuration Release
 
-          echo "✅ Verifying Appium connectivity..."
-          sleep 3
-          curl -f http://localhost:4723/wd/hub/status || {
-            echo "❌ Appium status check failed"
-            echo "Trying alternative check..."
-            nc -z localhost 4723 && echo "✅ Port 4723 is open" || echo "❌ Port 4723 is closed"
-            cat appium.log
-            exit 1
-          }
+            echo "🧪 Running NUnit tests..."
+            dotnet test ./GeneralStore.sln --configuration Release --logger trx
 
-          echo "📊 Appium is running successfully!"
-    
-          echo "🔨 Building project..."
-          dotnet restore
-          dotnet build --configuration Release
-
-          echo "🧪 Running NUnit tests with increased timeout..."
-          dotnet test ./GeneralStore.sln \
-            --configuration Release \
-            --logger "trx;LogFileName=test_results.trx" \
-
-          echo "🛑 Stopping Appium..."
-          kill $APPIUM_PID 2>/dev/null || true
-
-      - name: Stop Emulator
-        if: always()
-        run: |
-          echo "🛑 Stopping emulator..."
-          adb emu kill || true
-          # Альтернативний спосіб зупинки
-          if [ -n "$EMULATOR_PID" ]; then
-            kill $EMULATOR_PID 2>/dev/null || true
-          fi
-          sleep 5
+            echo "🛑 Stopping Appium..."
+            kill $APPIUM_PID 2>/dev/null || true
 
       - name: Upload diagnostics artifacts
         if: always()
@@ -131,7 +88,6 @@ jobs:
           path: |
             appium.log
             **/test_results.trx
-            **/TestResults/*
 
       - name: Publish Test Results
         if: always()
@@ -140,13 +96,3 @@ jobs:
           name: NUnit Tests
           path: "**/test_results.trx"
           reporter: dotnet-trx
-
-      - name: Check test results
-        if: always()
-        run: |
-          if ls **/test_results.trx 1> /dev/null 2>&1; then
-            echo "📊 Test results generated successfully"
-          else
-            echo "❌ No test results found"
-            exit 1
-          fi

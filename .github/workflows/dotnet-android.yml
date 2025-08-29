@@ -94,8 +94,7 @@ jobs:
           echo "🧪 Running NUnit tests with increased timeout..."
           dotnet test ./GeneralStore.sln \
             --configuration Release \
-            --logger "trx;LogFileName=test_results.trx" \     
-            -- TestRunTimeout=600000
+            --logger "trx;LogFileName=test_results.trx" \
 
           echo "🛑 Stopping Appium..."
           kill $APPIUM_PID 2>/dev/null || true

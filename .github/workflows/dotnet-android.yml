@@ -74,10 +74,10 @@ jobs:
       - name: Start Emulator, Appium and Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 34
           target: default
           arch: x86_64
-          profile: pixel_3a
+          profile: pixel_5
           emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot-save -gpu swiftshader_indirect
           disable-animations: true
           emulator-boot-timeout: 1200
@@ -111,7 +111,9 @@ jobs:
             dotnet build --configuration Release
 
             echo "🧪 Running NUnit tests..."
-            dotnet test ./GeneralStore.sln --configuration Release --logger trx
+            dotnet test --filter TestCategory=registration ./GeneralStore.sln --configuration Release --logger trx
+            dotnet test --filter TestCategory=SplashScreen ./GeneralStore.sln --configuration Release --logger trx
+
 
             echo "🛑 Stopping Appium..."
             kill $APPIUM_PID 2>/dev/null || true

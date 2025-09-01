@@ -43,7 +43,7 @@ namespace GeneralStore.Tests.Steps
             }
         }
  
-        [When(@"app is started")]
+        [When(@"application is launched")]
         public void WhenAppStarted()
         {
             Assert.That(_splash.IsDisplayed, Is.True, "App not started");

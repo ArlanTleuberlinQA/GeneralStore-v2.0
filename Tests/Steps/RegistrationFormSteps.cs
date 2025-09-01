@@ -120,8 +120,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             });
         }
 
-        [When(@"the user selects gender ""(.*)""")]
-        public void WhenTheUserSelectsGender(string gender)
+        [Then(@"the user selects gender ""(.*)""")]
+        public void ThenTheUserSelectsGender(string gender)
         {
             if (gender.ToLower() == "female")
             {
@@ -174,8 +174,8 @@ namespace GeneralStore.Tests.RegistrationFormTests
             _mainPage.EnterName(name);
         }
 
-        [When(@"the user clicks the Let's Shop button")]
-        public void WhenTheUserClicksTheLetsShopButton()
+        [Then(@"the user clicks the Let's Shop button")]
+        public void ThenTheUserClicksTheLetsShopButton()
         {
             Assert.Multiple(() =>
             {

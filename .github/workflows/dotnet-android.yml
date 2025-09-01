@@ -111,9 +111,7 @@ jobs:
             dotnet build --configuration Release
 
             echo "🧪 Running NUnit tests..."
-            dotnet test --filter TestCategory=registration ./GeneralStore.sln --configuration Release --logger trx
-            dotnet test --filter TestCategory=SplashScreen ./GeneralStore.sln --configuration Release --logger trx
-
+            dotnet test ./GeneralStore.sln --configuration Release --logger trx
 
             echo "🛑 Stopping Appium..."
             kill $APPIUM_PID 2>/dev/null || true
